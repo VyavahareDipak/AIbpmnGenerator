@@ -4,6 +4,7 @@ import com.bamoe.bpmnGererator.ai.service.WorkflowGenerationService;
 import com.bamoe.bpmnGererator.converter.WorkflowToBpmnConverter;
 import com.bamoe.bpmnGererator.dto.WorkflowResponse;
 import com.bamoe.bpmnGererator.model.bpmn.Definitions;
+import com.bamoe.bpmnGererator.normalizer.WorkflowNormalizer;
 import com.bamoe.bpmnGererator.serializer.BpmnSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,10 +21,18 @@ public class BpmnController {
     @Autowired
     private WorkflowGenerationService workflowGenerationService ;
 
+    @Autowired
+    WorkflowNormalizer workflowNormalizer ;
+
     @GetMapping
     public int generateBpmn(@RequestBody String promt){
         WorkflowResponse response =
                 workflowGenerationService.generate(promt);
+
+        System.out.println(response);
+        System.out.println("------------------------------------------------ \n");
+        workflowNormalizer.normalize(response) ;
+        System.out.println(response);
 
         WorkflowToBpmnConverter converter =
                 new WorkflowToBpmnConverter();
