@@ -1,110 +1,97 @@
 package com.bamoe.bpmnGererator.serializer;
 
 
-import com.bamoe.bpmnGererator.model.bpmn.*;
+import com.bamoe.bpmnGererator.dto.WorkflowResponse;
+import com.bamoe.bpmnGererator.model.bpmn.FlowElement;
+import com.bamoe.bpmnGererator.model.bpmn.Definitions;
+import com.bamoe.bpmnGererator.serializer.diagram.DiagramWriter;
+import com.bamoe.bpmnGererator.serializer.registry.WriterRegistry;
 import com.bamoe.bpmnGererator.serializer.writer.*;
 
+import com.bamoe.bpmnGererator.serializer.writer.dataWriter.ItemDefinitionWriter;
+import com.bamoe.bpmnGererator.serializer.writer.dataWriter.PropertyWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import java.nio.file.Path;
+import java.util.List;
 
 public class BpmnSerializer {
 
-    private final DefinitionsWriter definitionsWriter =
-            new DefinitionsWriter();
+    private final WriterRegistry registry =
+            new WriterRegistry(List.of(
+                    new StartEventWriter(),
+                    new EndEventWriter(),
+                    new UserTaskWriter(),
+                    new ServiceTaskWriter(),
+                    new ScriptTaskWriter(),
+                    new ExclusiveGatewayWriter(),
+                    new ParallelGatewayWriter(),
+                    new SequenceFlowWriter()
+            ));
+    private final DefinitionsWriter definitionsWriter = new DefinitionsWriter();
+    private final ProcessWriter processWriter = new ProcessWriter() ;
+    private final ItemDefinitionWriter itemDefinitionWriter = new ItemDefinitionWriter();
+    private final PropertyWriter propertyWriter = new PropertyWriter();
 
-    private final ProcessWriter processWriter =
-            new ProcessWriter();
 
-    private final EventWriter eventWriter =
-            new EventWriter();
-
-    private final TaskWriter taskWriter =
-            new TaskWriter();
-
-    private final GatewayWriter gatewayWriter =
-            new GatewayWriter();
-
-    private final SequenceFlowWriter sequenceFlowWriter =
-            new SequenceFlowWriter();
-
-    public void serialize(
-            Definitions definitions,
-            Path output) throws Exception {
+    public void serialize(Definitions definitions,
+                          Path output , WorkflowResponse workflowResponse) throws Exception {
 
         Document document =
-                DocumentBuilderFactory
-                        .newInstance()
+                DocumentBuilderFactory.newInstance()
                         .newDocumentBuilder()
                         .newDocument();
 
         Element definitionsElement =
                 definitionsWriter.write(document);
 
-        Element processElement =
+        itemDefinitionWriter.write(
+                document,
+                definitionsElement,
+                workflowResponse.getVariables());
+
+        Element process =
                 processWriter.write(
                         document,
                         definitionsElement,
                         definitions.getProcess());
 
+        propertyWriter.write(
+                document,
+                process,
+                workflowResponse.getVariables());
+
         for (FlowElement element :
                 definitions.getProcess().getFlowElements()) {
 
-            if (element instanceof FlowNode node) {
+            BpmnElementWriter writer =
+                    registry.getWriter(element.getClass());
 
-                eventWriter.write(
-                        document,
-                        processElement,
-                        node);
-
-                taskWriter.write(
-                        document,
-                        processElement,
-                        node);
-
-                gatewayWriter.write(
-                        document,
-                        processElement,
-                        node);
-
+            if (writer == null) {
+                throw new IllegalArgumentException(
+                        "No writer registered for " + element.getClass().getSimpleName());
             }
 
-            if (element instanceof SequenceFlow flow) {
-
-                sequenceFlowWriter.write(
-                        document,
-                        processElement,
-                        flow);
-
-            }
-
+            writer.write(document, process, element);
         }
+        new DiagramWriter().write(
+                document,
+                definitionsElement,
+                definitions.getProcess());
 
         Transformer transformer =
-                TransformerFactory
-                        .newInstance()
+                TransformerFactory.newInstance()
                         .newTransformer();
 
-        transformer.setOutputProperty(
-                OutputKeys.INDENT,
-                "yes");
-
-        transformer.setOutputProperty(
-                "{http://xml.apache.org/xslt}indent-amount",
-                "2");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
         transformer.transform(
                 new DOMSource(document),
                 new StreamResult(output.toFile()));
-
     }
-
 }

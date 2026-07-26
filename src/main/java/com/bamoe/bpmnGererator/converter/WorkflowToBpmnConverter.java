@@ -54,6 +54,10 @@ public class WorkflowToBpmnConverter {
             flow.setSourceRef(connection.getSource());
             flow.setTargetRef(connection.getTarget());
 
+            flow.setName(connection.getName());
+            flow.setConditionExpression(connection.getConditionExpression());
+            flow.setDefaultFlow(connection.isDefaultFlow());
+
             process.getFlowElements().add(flow);
 
             FlowNode sourceNode = nodeMap.get(connection.getSource());
@@ -65,6 +69,27 @@ public class WorkflowToBpmnConverter {
 
             if (targetNode != null) {
                 targetNode.getIncoming().add(flow.getId());
+            }
+        }
+
+        for (FlowElement element : process.getFlowElements()) {
+
+            if (!(element instanceof ExclusiveGateway gateway)) {
+                continue;
+            }
+
+            for (FlowElement flowElement : process.getFlowElements()) {
+
+                if (!(flowElement instanceof SequenceFlow flow)) {
+                    continue;
+                }
+
+                if (flow.getSourceRef().equals(gateway.getId())
+                        && flow.isDefaultFlow()) {
+
+                    gateway.setDefaultFlowId(flow.getId());
+                    break;
+                }
             }
         }
 

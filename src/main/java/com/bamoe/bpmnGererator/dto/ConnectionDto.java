@@ -7,4 +7,10 @@ public class ConnectionDto {
 
    private String  source ;
     private String target ;
+    private String name;
+    // Expression evaluated by the workflow engine
+    private String conditionExpression;
+
+    // Marks the default outgoing flow
+    private boolean defaultFlow;
 }

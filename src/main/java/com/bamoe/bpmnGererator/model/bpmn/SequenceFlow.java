@@ -11,4 +11,10 @@ public class SequenceFlow extends FlowElement {
 
     private String targetRef;
 
+    private String name;
+
+    private String conditionExpression;
+
+    private boolean defaultFlow;
+
 }

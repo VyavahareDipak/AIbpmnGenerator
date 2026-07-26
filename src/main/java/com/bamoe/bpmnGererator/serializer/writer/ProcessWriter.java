@@ -20,10 +20,6 @@ public class ProcessWriter {
                 "id",
                 process.getId());
 
-        processElement.setAttribute(
-                "isExecutable",
-                "true");
-
         if (process.getName() != null) {
 
             processElement.setAttribute(
@@ -32,9 +28,6 @@ public class ProcessWriter {
 
         }
 
-        processElement.setAttribute(
-                "drools:adHoc",
-                "false");
 
         definitions.appendChild(processElement);
 

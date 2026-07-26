@@ -11,4 +11,5 @@ public class WorkflowResponse {
     private String processName ;
     List<NodeDto> nodes ;
     List<ConnectionDto> connections ;
+    private List<VariableDto> variables;
 }

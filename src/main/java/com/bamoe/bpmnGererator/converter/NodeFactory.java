@@ -23,13 +23,14 @@ public class NodeFactory {
                 break;
 
             case "USER_TASK":
-                node = new UserTask();
-
+                UserTask  userTask = new UserTask();
+                userTask.setInputs(nodeDto.getInputs());
+                userTask.setOutputs(nodeDto.getOutputs());
+                node = userTask ;
                 break;
 
             case "SERVICE_TASK":
                 node = new ServiceTask();
-
                 break;
 
             case "SCRIPT_TASK":
@@ -37,11 +38,15 @@ public class NodeFactory {
                 break;
 
             case "EXCLUSIVE_GATEWAY":
-                node = new ExclusiveGateway();
+                ExclusiveGateway exclusiveGateway = new ExclusiveGateway();
+                exclusiveGateway.setGatewayDirection(nodeDto.getGatewayDirection());
+                node = exclusiveGateway ;
                 break;
 
             case "PARALLEL_GATEWAY":
-                node = new ParallelGateway();
+                ParallelGateway parallelGateway = new ParallelGateway();
+                parallelGateway.setGatewayDirection(nodeDto.getGatewayDirection());
+                node = parallelGateway ;
                 break;
 
             default:
