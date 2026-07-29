@@ -3,6 +3,8 @@ package com.bamoe.bpmnGererator.serializer.diagram;
 
 import com.bamoe.bpmnGererator.model.bpmn.*;
 import  com.bamoe.bpmnGererator.model.bpmn.Process ;
+import com.bamoe.bpmnGererator.serializer.diagram.model.LayoutResult;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -14,9 +16,11 @@ public class SimpleHorizontalLayoutEngine implements LayoutEngine {
     private static final int H_GAP = 260;
 
     @Override
-    public Map<String, NodePosition> layout(Process process) {
+    public LayoutResult layout(Process process) {
 
-        Map<String, NodePosition> map = new LinkedHashMap<>();
+        LayoutResult layoutResult = new LayoutResult() ;
+
+        Map<String, NodePosition> map = layoutResult.getNodePositions();
 
         int x = START_X;
 
@@ -48,9 +52,7 @@ public class SimpleHorizontalLayoutEngine implements LayoutEngine {
 
             x += H_GAP;
         }
-
-        return map;
+        layoutResult.setNodePositions(map);
+        return layoutResult;
     }
-
-
 }

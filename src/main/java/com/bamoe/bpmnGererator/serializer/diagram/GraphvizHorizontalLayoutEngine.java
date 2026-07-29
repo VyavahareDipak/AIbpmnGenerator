@@ -2,35 +2,28 @@ package com.bamoe.bpmnGererator.serializer.diagram;
 
 import com.bamoe.bpmnGererator.model.bpmn.*;
 import com.bamoe.bpmnGererator.model.bpmn.Process;
-import guru.nidi.graphviz.engine.Format;
-import guru.nidi.graphviz.engine.Graphviz;
+import com.bamoe.bpmnGererator.serializer.diagram.model.EdgeRoute;
+import com.bamoe.bpmnGererator.serializer.diagram.model.LayoutResult;
+import com.bamoe.bpmnGererator.serializer.diagram.model.RoutePoint;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.io.File;
 
 public class GraphvizHorizontalLayoutEngine implements LayoutEngine {
 
+    private static final int SCALE = 72;
+
     @Override
-    public Map<String, NodePosition> layout(Process process) {
+    public LayoutResult layout(Process process) {
 
         String dot = buildDot(process);
 
-        String plain =
-                Graphviz.fromString(dot)
-                        .render(Format.PLAIN)
-                        .toString();
-        System.out.println(plain);
-        try {
-            Graphviz.fromString(dot)
-                    .render(Format.SVG)
-                    .toFile(new File("graph.svg"));
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        String plain = executeGraphviz(dot);
 
-        return parsePlainOutput(process, plain);
+        return parsePlain(process, plain);
     }
 
     private String buildDot(Process process) {
@@ -38,10 +31,20 @@ public class GraphvizHorizontalLayoutEngine implements LayoutEngine {
         StringBuilder sb = new StringBuilder();
 
         sb.append("digraph BPMN {\n");
-        sb.append("rankdir=LR;\n");
-        sb.append("nodesep=0.8;\n");
-        sb.append("ranksep=1.2;\n");
-        sb.append("splines=ortho;\n");
+
+        sb.append("graph [\n");
+        sb.append("    rankdir=LR,\n");
+        sb.append("    splines=ortho,\n");
+        sb.append("    nodesep=0.8,\n");
+        sb.append("    ranksep=1.3\n");
+        sb.append("];\n");
+
+        sb.append("node [\n");
+        sb.append("    fontname=\"Arial\",\n");
+        sb.append("    margin=0,\n");
+        sb.append("    fixedsize=true\n");
+        sb.append("];\n");
+
 
         for (FlowElement e : process.getFlowElements()) {
 
@@ -49,7 +52,9 @@ public class GraphvizHorizontalLayoutEngine implements LayoutEngine {
                 continue;
 
             sb.append(node.getId())
-                    .append(" [shape=box];\n");
+                    .append(" [shape=")
+                    .append(getShape(node))
+                    .append("];\n");
 
         }
 
@@ -62,7 +67,6 @@ public class GraphvizHorizontalLayoutEngine implements LayoutEngine {
                     .append(" -> ")
                     .append(flow.getTargetRef())
                     .append(";\n");
-
         }
 
         sb.append("}");
@@ -70,60 +74,167 @@ public class GraphvizHorizontalLayoutEngine implements LayoutEngine {
         return sb.toString();
     }
 
-    private Map<String, NodePosition> parsePlainOutput(
-            Process process,
-            String plain) {
+    private String executeGraphviz(String dot) {
 
-        Map<String, NodePosition> map = new LinkedHashMap<>();
+        try {
 
-        String[] lines = plain.split("\\R");
+            ProcessBuilder pb =
+                    new ProcessBuilder("dot", "-Tplain");
 
-        for (String line : lines) {
+            java.lang.Process p = pb.start();
 
-            if (!line.startsWith("node"))
-                continue;
+            p.getOutputStream().write(dot.getBytes());
+            p.getOutputStream().close();
 
-            String[] parts = line.split("\\s+");
+            BufferedReader reader =
+                    new BufferedReader(
+                            new InputStreamReader(
+                                    p.getInputStream()));
 
-            String id = parts[1];
+            StringBuilder result = new StringBuilder();
 
-            double x = Double.parseDouble(parts[2]);
+            String line;
 
-            double y = Double.parseDouble(parts[3]);
+            while ((line = reader.readLine()) != null) {
 
-            NodePosition p = new NodePosition();
-
-            p.setNodeId(id);
-
-            p.setX((int) (x * 72));
-
-            p.setY((int) (800 - y * 72));
-
-            FlowNode node = findNode(process, id);
-
-            if (node instanceof StartEvent
-                    || node instanceof EndEvent
-                    || node instanceof ExclusiveGateway
-                    || node instanceof ParallelGateway) {
-
-                p.setWidth(60);
-                p.setHeight(60);
-
-            } else {
-
-                p.setWidth(180);
-                p.setHeight(100);
+                result.append(line).append("\n");
 
             }
 
-            map.put(id, p);
+            p.waitFor();
+
+            return result.toString();
+
+        } catch (IOException | InterruptedException e) {
+
+            throw new RuntimeException(e);
+
+        }
+    }
+
+    private LayoutResult parsePlain(
+            Process process,
+            String plain) {
+
+        LayoutResult result = new LayoutResult();
+
+        Map<String, NodePosition> nodes =
+                result.getNodePositions();
+
+        Map<String, EdgeRoute> routes =
+                result.getEdgeRoutes();
+
+        String[] lines = plain.split("\\R");
+
+        double graphHeight = 0;
+
+        for (String line : lines) {
+
+            if (line.startsWith("graph")) {
+
+                String[] p = line.split("\\s+");
+
+                graphHeight =
+                        Double.parseDouble(p[3]);
+
+            }
 
         }
 
-        return map;
+        for (String line : lines) {
+
+            String[] parts = line.split("\\s+");
+
+            if (parts.length == 0)
+                continue;
+
+            if ("node".equals(parts[0])) {
+
+                String id = parts[1];
+
+                double x =
+                        Double.parseDouble(parts[2]);
+
+                double y =
+                        Double.parseDouble(parts[3]);
+
+                NodePosition pos = new NodePosition();
+
+                pos.setNodeId(id);
+
+//                pos.setX((int) (x * SCALE));
+//
+//                pos.setY((int) ((graphHeight - y) * SCALE));
+
+                FlowNode node = findNode(process, id);
+
+                int width;
+                int height;
+
+                if (node instanceof StartEvent
+                        || node instanceof EndEvent
+                        || node instanceof ExclusiveGateway
+                        || node instanceof ParallelGateway) {
+
+                    width = 60;
+                    height = 60;
+
+                } else {
+
+                    width = 180;
+                    height = 100;
+                }
+                pos.setWidth(width);
+                pos.setHeight(height);
+
+                pos.setX((int)(x * SCALE - width / 2));
+                pos.setY((int)((graphHeight - y) * SCALE - height / 2));
+
+                nodes.put(id, pos);
+            }
+
+            if ("edge".equals(parts[0])) {
+
+                EdgeRoute route = new EdgeRoute();
+
+                route.setSourceId(parts[1]);
+                route.setTargetId(parts[2]);
+
+                int count =
+                        Integer.parseInt(parts[3]);
+
+                int index = 4;
+
+                for (int i = 0; i < count; i++) {
+
+                    double x =
+                            Double.parseDouble(parts[index++]);
+
+                    double y =
+                            Double.parseDouble(parts[index++]);
+
+                    route.getPoints().add(
+                            new RoutePoint(
+                                    (int) (x * SCALE),
+                                    (int) ((graphHeight - y) * SCALE)
+                            ));
+                }
+
+                routes.put(
+                        route.getSourceId() + "_"
+                                + route.getTargetId(),
+                        route);
+
+            }
+
+        }
+
+        return result;
     }
 
-    private FlowNode findNode(Process process, String id) {
+    private FlowNode findNode(
+            Process process,
+            String id) {
 
         for (FlowElement e : process.getFlowElements()) {
 
@@ -137,6 +248,23 @@ public class GraphvizHorizontalLayoutEngine implements LayoutEngine {
         }
 
         throw new IllegalArgumentException(id);
+    }
+
+    private String getShape(FlowNode node) {
+
+        if (node instanceof StartEvent)
+            return "circle";
+
+        if (node instanceof EndEvent)
+            return "doublecircle";
+
+        if (node instanceof ExclusiveGateway)
+            return "diamond, width=0.85,height=0.85,fixedsize=true";
+
+        if (node instanceof ParallelGateway)
+            return "diamond";
+
+        return "box,width=2.5,height=1.4,fixedsize=true";
     }
 
 }
