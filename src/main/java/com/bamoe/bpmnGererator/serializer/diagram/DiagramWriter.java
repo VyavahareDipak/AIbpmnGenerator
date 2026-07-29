@@ -7,12 +7,13 @@ import com.bamoe.bpmnGererator.model.bpmn.Process;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class DiagramWriter {
 
     private final LayoutEngine layoutEngine =
-            new SimpleHorizontalLayoutEngine();
+            new GraphvizHorizontalLayoutEngine();
 
     private final ShapeWriter shapeWriter =
             new ShapeWriter();
@@ -22,7 +23,7 @@ public class DiagramWriter {
 
     public void write(Document doc,
                       Element definitions,
-                      Process process) {
+                      Process process)  {
 
         Element diagram =
                 doc.createElement("bpmndi:BPMNDiagram");
