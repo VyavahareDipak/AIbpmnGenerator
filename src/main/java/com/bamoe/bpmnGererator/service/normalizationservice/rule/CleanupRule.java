@@ -1,8 +1,7 @@
-package com.bamoe.bpmnGererator.normalizer.rule;
+package com.bamoe.bpmnGererator.service.normalizationservice.rule;
 
 import com.bamoe.bpmnGererator.dto.*;
-import com.bamoe.bpmnGenerator.normalizer.WorkflowNormalizationRule ;
-import com.bamoe.bpmnGererator.normalizer.WorkflowUtils;
+import com.bamoe.bpmnGererator.util.WorkflowNormalizationUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -154,10 +153,10 @@ public class CleanupRule implements WorkflowNormalizationRule {
             }
 
             List<ConnectionDto> incoming =
-                    WorkflowUtils.getIncomingConnections(workflow, node.getId());
+                    WorkflowNormalizationUtil.getIncomingConnections(workflow, node.getId());
 
             List<ConnectionDto> outgoing =
-                    WorkflowUtils.getOutgoingConnections(workflow, node.getId());
+                    WorkflowNormalizationUtil.getOutgoingConnections(workflow, node.getId());
 
             // gateway does nothing
             if (incoming.size() == 1 && outgoing.size() == 1) {

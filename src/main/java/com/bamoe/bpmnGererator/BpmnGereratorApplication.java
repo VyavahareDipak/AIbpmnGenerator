@@ -1,17 +1,7 @@
 package com.bamoe.bpmnGererator;
 
-import com.bamoe.bpmnGererator.ai.service.WorkflowGenerationService;
-import com.bamoe.bpmnGererator.converter.WorkflowToBpmnConverter;
-import com.bamoe.bpmnGererator.dto.WorkflowResponse;
-import com.bamoe.bpmnGererator.model.bpmn.Definitions;
-import com.bamoe.bpmnGererator.serializer.BpmnSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import tools.jackson.databind.ObjectMapper;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @SpringBootApplication
 public class BpmnGereratorApplication {

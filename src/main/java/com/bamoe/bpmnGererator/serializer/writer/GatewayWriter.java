@@ -2,7 +2,7 @@ package com.bamoe.bpmnGererator.serializer.writer;
 
 
 import com.bamoe.bpmnGererator.model.bpmn.*;
-import com.bamoe.bpmnGererator.serializer.XmlUtil;
+import com.bamoe.bpmnGererator.util.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

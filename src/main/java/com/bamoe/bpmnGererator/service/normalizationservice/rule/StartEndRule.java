@@ -1,9 +1,8 @@
-package com.bamoe.bpmnGererator.normalizer.rule;
+package com.bamoe.bpmnGererator.service.normalizationservice.rule;
 
 import com.bamoe.bpmnGererator.dto.NodeDto;
 import com.bamoe.bpmnGererator.dto.WorkflowResponse;
-import com.bamoe.bpmnGenerator.normalizer.WorkflowNormalizationRule ;
-import com.bamoe.bpmnGererator.normalizer.WorkflowUtils;
+import com.bamoe.bpmnGererator.util.WorkflowNormalizationUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,7 +20,7 @@ public class StartEndRule implements WorkflowNormalizationRule {
     private void ensureSingleStartEvent(WorkflowResponse workflow) {
 
         List<NodeDto> starts =
-                WorkflowUtils.getNodesByType(workflow, "START_EVENT");
+                WorkflowNormalizationUtil.getNodesByType(workflow, "START_EVENT");
 
         if (starts.isEmpty()) {
 
@@ -30,7 +29,7 @@ public class StartEndRule implements WorkflowNormalizationRule {
             start.setName("Start");
             start.setType("START_EVENT");
 
-            WorkflowUtils.addNode(workflow, start);
+            WorkflowNormalizationUtil.addNode(workflow, start);
 
         } else if (starts.size() > 1) {
 
@@ -43,7 +42,7 @@ public class StartEndRule implements WorkflowNormalizationRule {
     private void ensureAtLeastOneEndEvent(WorkflowResponse workflow) {
 
         List<NodeDto> ends =
-                WorkflowUtils.getNodesByType(workflow, "END_EVENT");
+                WorkflowNormalizationUtil.getNodesByType(workflow, "END_EVENT");
 
         if (ends.isEmpty()) {
 
@@ -52,7 +51,7 @@ public class StartEndRule implements WorkflowNormalizationRule {
             end.setName("End");
             end.setType("END_EVENT");
 
-            WorkflowUtils.addNode(workflow, end);
+            WorkflowNormalizationUtil.addNode(workflow, end);
 
         }
     }

@@ -1,4 +1,4 @@
-package com.bamoe.bpmnGenerator.normalizer;
+package com.bamoe.bpmnGererator.service.normalizationservice.rule;
 
 import com.bamoe.bpmnGererator.dto.WorkflowResponse ;
 public interface WorkflowNormalizationRule {

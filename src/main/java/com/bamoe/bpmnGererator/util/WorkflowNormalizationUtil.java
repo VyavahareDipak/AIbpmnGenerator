@@ -1,4 +1,4 @@
-package com.bamoe.bpmnGererator.normalizer;
+package com.bamoe.bpmnGererator.util;
 
 import com.bamoe.bpmnGererator.dto.ConnectionDto;
 import com.bamoe.bpmnGererator.dto.NodeDto;
@@ -11,8 +11,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class WorkflowUtils {
-    private WorkflowUtils() {
+public class WorkflowNormalizationUtil {
+    private WorkflowNormalizationUtil() {
     }
 
     private static final AtomicInteger GATEWAY_COUNTER = new AtomicInteger(1);

@@ -1,10 +1,9 @@
-package com.bamoe.bpmnGererator.normalizer.rule;
+package com.bamoe.bpmnGererator.service.normalizationservice.rule;
 
 import com.bamoe.bpmnGererator.dto.ConnectionDto;
 import com.bamoe.bpmnGererator.dto.NodeDto;
 import com.bamoe.bpmnGererator.dto.WorkflowResponse;
-import com.bamoe.bpmnGenerator.normalizer.WorkflowNormalizationRule ;
-import com.bamoe.bpmnGererator.normalizer.WorkflowUtils;
+import com.bamoe.bpmnGererator.util.WorkflowNormalizationUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,7 +16,7 @@ public class ParallelGatewayRule
     public void normalize(WorkflowResponse workflow) {
 
         List<NodeDto> gateways =
-                WorkflowUtils.getNodesByType(
+                WorkflowNormalizationUtil.getNodesByType(
                         workflow,
                         "PARALLEL_GATEWAY");
 
@@ -43,10 +42,10 @@ public class ParallelGatewayRule
         }
 
         int incoming =
-                WorkflowUtils.incomingCount(workflow, gateway.getId());
+                WorkflowNormalizationUtil.incomingCount(workflow, gateway.getId());
 
         int outgoing =
-                WorkflowUtils.outgoingCount(workflow, gateway.getId());
+                WorkflowNormalizationUtil.outgoingCount(workflow, gateway.getId());
 
         if (incoming == 1 && outgoing > 1) {
 
@@ -71,10 +70,10 @@ public class ParallelGatewayRule
             NodeDto gateway) {
 
         int incoming =
-                WorkflowUtils.incomingCount(workflow, gateway.getId());
+                WorkflowNormalizationUtil.incomingCount(workflow, gateway.getId());
 
         int outgoing =
-                WorkflowUtils.outgoingCount(workflow, gateway.getId());
+                WorkflowNormalizationUtil.outgoingCount(workflow, gateway.getId());
 
         if ("Diverging".equals(gateway.getGatewayDirection())) {
 
@@ -125,7 +124,7 @@ public class ParallelGatewayRule
         }
 
         List<ConnectionDto> outgoing =
-                WorkflowUtils.getOutgoingConnections(
+                WorkflowNormalizationUtil.getOutgoingConnections(
                         workflow,
                         gateway.getId());
 

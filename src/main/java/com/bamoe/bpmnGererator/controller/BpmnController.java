@@ -1,62 +1,33 @@
 package com.bamoe.bpmnGererator.controller;
 
-import com.bamoe.bpmnGererator.ai.service.WorkflowGenerationService;
-import com.bamoe.bpmnGererator.converter.WorkflowToBpmnConverter;
-import com.bamoe.bpmnGererator.dto.WorkflowResponse;
-import com.bamoe.bpmnGererator.model.bpmn.Definitions;
-import com.bamoe.bpmnGererator.normalizer.WorkflowNormalizer;
-import com.bamoe.bpmnGererator.serializer.BpmnSerializer;
+import com.bamoe.bpmnGererator.dto.request.BpmnGenerationRequest;
+import com.bamoe.bpmnGererator.dto.request.BpmnUpdateRequestDto;
+import com.bamoe.bpmnGererator.service.BpmnService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import javax.validation.Valid;
 
 @RestController
+@RequestMapping("/api/v1/bpmn")
 public class BpmnController {
 
     @Autowired
-    private WorkflowGenerationService workflowGenerationService ;
+    private BpmnService bpmnService ;
 
-    @Autowired
-    WorkflowNormalizer workflowNormalizer ;
-
-    @GetMapping
-    public int generateBpmn(@RequestBody String promt){
-        WorkflowResponse response =
-                workflowGenerationService.generate(promt);
-
-        System.out.println(response);
-        System.out.println("------------------------------------------------ \n");
-        workflowNormalizer.normalize(response) ;
-        System.out.println(response);
-
-        WorkflowToBpmnConverter converter =
-                new WorkflowToBpmnConverter();
-
-        System.out.println("1. JSON Parsed");
-
-
-        Definitions definitions = converter.convert(response);
-
-        System.out.println("2. Converted");
-
-        BpmnSerializer serializer = new BpmnSerializer();
-
-        System.out.println("3. Before Serialize");
-        try {
-            Path path = Paths.get("parallel.bpmn");
-
-            System.out.println(path.toAbsolutePath());
-            serializer.serialize(definitions,path, response);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        System.out.println("4. After Serialize");
-        return  200 ;
+    @PostMapping(
+            value = "/generate",
+            produces = "application/xml"
+    )
+    public ResponseEntity<ByteArrayResource> generateBpmn(@Valid @RequestBody BpmnGenerationRequest request) throws Exception {
+       return  bpmnService.generateBpmn(request);
     }
 
+    @PostMapping("/update")
+    public ResponseEntity<ByteArrayResource> updateBpmn(@Valid @RequestBody BpmnUpdateRequestDto bpmnUpdateRequestDto) throws Exception {
+       return bpmnService.updateBpmn(bpmnUpdateRequestDto) ;
+    } ;
 
 }

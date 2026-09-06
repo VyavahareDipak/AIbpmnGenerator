@@ -1,10 +1,9 @@
-package com.bamoe.bpmnGererator.normalizer.rule;
+package com.bamoe.bpmnGererator.service.normalizationservice.rule;
 
-import com.bamoe.bpmnGenerator.normalizer.WorkflowNormalizationRule;
 import com.bamoe.bpmnGererator.dto.ConnectionDto;
 import com.bamoe.bpmnGererator.dto.NodeDto;
 import com.bamoe.bpmnGererator.dto.WorkflowResponse;
-import com.bamoe.bpmnGererator.normalizer.WorkflowUtils;
+import com.bamoe.bpmnGererator.util.WorkflowNormalizationUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -17,13 +16,13 @@ public class UserTaskRule implements WorkflowNormalizationRule {
     public void normalize(WorkflowResponse workflow) {
 
         List<NodeDto> userTasks =
-                WorkflowUtils.getNodesByType(workflow, "USER_TASK");
+                WorkflowNormalizationUtil.getNodesByType(workflow, "USER_TASK");
 
         // Copy to avoid ConcurrentModificationException
         for (NodeDto userTask : new ArrayList<>(userTasks)) {
 
             List<ConnectionDto> incoming =
-                    WorkflowUtils.getIncomingConnections(
+                    WorkflowNormalizationUtil.getIncomingConnections(
                             workflow,
                             userTask.getId());
 
@@ -49,12 +48,12 @@ public class UserTaskRule implements WorkflowNormalizationRule {
 
         NodeDto gateway = new NodeDto();
 
-        gateway.setId(WorkflowUtils.generateGatewayId());
+        gateway.setId(WorkflowNormalizationUtil.generateGatewayId());
         gateway.setName("Merge Before " + userTask.getName());
         gateway.setType("EXCLUSIVE_GATEWAY");
         gateway.setGatewayDirection("Converging");
 
-        WorkflowUtils.addNode(workflow, gateway);
+        WorkflowNormalizationUtil.addNode(workflow, gateway);
 
         //---------------------------------------
         // Redirect all incoming flows
@@ -75,11 +74,11 @@ public class UserTaskRule implements WorkflowNormalizationRule {
         //---------------------------------------
 
         ConnectionDto gatewayToTask =
-                WorkflowUtils.createConnection(
+                WorkflowNormalizationUtil.createConnection(
                         gateway.getId(),
                         userTask.getId());
 
-        WorkflowUtils.addConnection(
+        WorkflowNormalizationUtil.addConnection(
                 workflow,
                 gatewayToTask);
     }

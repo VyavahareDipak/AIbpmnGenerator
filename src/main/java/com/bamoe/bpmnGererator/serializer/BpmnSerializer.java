@@ -17,6 +17,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -38,10 +39,12 @@ public class BpmnSerializer {
     private final ItemDefinitionWriter itemDefinitionWriter = new ItemDefinitionWriter();
     private final PropertyWriter propertyWriter = new PropertyWriter();
 
+    public void serialize(
+            Definitions definitions,
+            OutputStream outputStream,
+            WorkflowResponse workflowResponse) throws Exception {
 
-    public void serialize(Definitions definitions,
-                          Path output , WorkflowResponse workflowResponse) throws Exception {
-
+        // Existing serialization logic
         Document document =
                 DocumentBuilderFactory.newInstance()
                         .newDocumentBuilder()
@@ -84,14 +87,15 @@ public class BpmnSerializer {
                 definitionsElement,
                 definitions.getProcess());
 
+
         Transformer transformer =
-                TransformerFactory.newInstance()
-                        .newTransformer();
+                TransformerFactory.newInstance().newTransformer();
 
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
         transformer.transform(
                 new DOMSource(document),
-                new StreamResult(output.toFile()));
+                new StreamResult(outputStream)
+        );
     }
 }

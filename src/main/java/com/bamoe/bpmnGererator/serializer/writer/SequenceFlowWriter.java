@@ -3,7 +3,7 @@ package com.bamoe.bpmnGererator.serializer.writer;
 
 
 import com.bamoe.bpmnGererator.model.bpmn.SequenceFlow;
-import com.bamoe.bpmnGererator.serializer.XmlUtil;
+import com.bamoe.bpmnGererator.util.XmlUtil;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

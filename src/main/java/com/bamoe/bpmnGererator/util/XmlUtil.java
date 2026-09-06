@@ -1,4 +1,4 @@
-package com.bamoe.bpmnGererator.serializer;
+package com.bamoe.bpmnGererator.util;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

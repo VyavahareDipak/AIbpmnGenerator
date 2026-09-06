@@ -1,14 +1,13 @@
-package com.bamoe.bpmnGererator.normalizer;
+package com.bamoe.bpmnGererator.service.normalizationservice;
 
 import com.bamoe.bpmnGererator.dto.WorkflowResponse;
-import com.bamoe.bpmnGererator.normalizer.rule.*;
-import com.bamoe.bpmnGenerator.normalizer.WorkflowNormalizationRule;
+import com.bamoe.bpmnGererator.service.normalizationservice.rule.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class WorkflowNormalizer {
+public class WorkflowResponseNormalizationService {
 
     private final List<WorkflowNormalizationRule> rules = List.of(
             new StartEndRule(),

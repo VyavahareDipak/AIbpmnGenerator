@@ -4,8 +4,6 @@ package com.bamoe.bpmnGererator.serializer.diagram;
 import com.bamoe.bpmnGererator.model.bpmn.*;
 import  com.bamoe.bpmnGererator.model.bpmn.Process ;
 import com.bamoe.bpmnGererator.serializer.diagram.model.LayoutResult;
-
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SimpleHorizontalLayoutEngine implements LayoutEngine {

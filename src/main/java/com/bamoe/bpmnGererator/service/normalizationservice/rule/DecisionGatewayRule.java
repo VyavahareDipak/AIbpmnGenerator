@@ -1,10 +1,9 @@
-package com.bamoe.bpmnGererator.normalizer.rule;
+package com.bamoe.bpmnGererator.service.normalizationservice.rule;
 
 import com.bamoe.bpmnGererator.dto.ConnectionDto;
 import com.bamoe.bpmnGererator.dto.NodeDto;
 import com.bamoe.bpmnGererator.dto.WorkflowResponse;
-import com.bamoe.bpmnGererator.normalizer.WorkflowUtils;
-import com.bamoe.bpmnGenerator.normalizer.WorkflowNormalizationRule;
+import com.bamoe.bpmnGererator.util.WorkflowNormalizationUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,7 +15,7 @@ public class DecisionGatewayRule implements WorkflowNormalizationRule {
     public void normalize(WorkflowResponse workflow) {
 
         List<NodeDto> gateways =
-                WorkflowUtils.getNodesByType(
+                WorkflowNormalizationUtil.getNodesByType(
                         workflow,
                         "EXCLUSIVE_GATEWAY");
         for (NodeDto gateway : gateways) {
@@ -25,7 +24,7 @@ public class DecisionGatewayRule implements WorkflowNormalizationRule {
                 continue;
             }
             List<ConnectionDto> outgoing =
-                    WorkflowUtils.getOutgoingConnections(
+                    WorkflowNormalizationUtil.getOutgoingConnections(
                             workflow,
                             gateway.getId());
             boolean defaultFound = false;

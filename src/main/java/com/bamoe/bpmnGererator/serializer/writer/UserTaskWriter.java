@@ -2,7 +2,6 @@ package com.bamoe.bpmnGererator.serializer.writer;
 
 import com.bamoe.bpmnGererator.dto.NodeVariableDto;
 import com.bamoe.bpmnGererator.model.bpmn.UserTask;
-import com.bamoe.bpmnGererator.serializer.XmlUtil;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
